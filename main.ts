@@ -919,13 +919,13 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Copy document as HTML Settings'});
+		containerEl.createEl('h2', {text: '设置'});
 
-		containerEl.createEl('h3', {text: 'Compatibility'});
+		containerEl.createEl('h3', {text: '兼容性选项'});
 
 		new Setting(containerEl)
-			.setName('Convert SVG files to bitmap')
-			.setDesc('If checked, SVG files are converted to bitmap. This makes the copied documents heavier but improves compatibility (eg. with gmail).')
+			.setName('将 SVG 转换为位图')
+			.setDesc('如果选中，SVG 文件将转换为位图。这会使复制的文档 heavier 但提高兼容性（例如 Gmail）。')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.convertSvgToBitmap)
 				.onChange(async (value) => {
@@ -934,8 +934,8 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Embed external images')
-			.setDesc('If checked, external images are downloaded and embedded. If unchecked, the resulting document may contain links to external resources')
+			.setName('嵌入外部图片')
+			.setDesc('如果选中，外部图片将被下载并嵌入。如果取消选中，生成的文档可能包含指向外部资源的链接')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.embedExternalLinks)
 				.onChange(async (value) => {
@@ -945,8 +945,8 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 
 
 		new Setting(containerEl)
-			.setName('Render code with tables')
-			.setDesc("If checked code blocks are rendered as tables, which makes pasting into Google docs somewhat prettier.")
+			.setName('渲染代码块为表格')
+			.setDesc('如果选中，代码块将渲染为表格。这会使粘贴到 Google 文档中稍微漂亮些 。')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.formatCodeWithTables)
 				.onChange(async (value) => {
@@ -955,8 +955,9 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Render callouts with tables')
-			.setDesc("If checked callouts are rendered as tables, which makes pasting into Google docs somewhat prettier.")
+			// .setName('Render callouts with tables')
+			.setName('渲染调用为表格')
+			.setDesc('如果选中，调用将渲染为表格。这会使粘贴到 Google 文档中稍微漂亮些 。')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.formatCalloutsWithTables)
 				.onChange(async (value) => {
@@ -965,11 +966,11 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				}));
 
 
-		containerEl.createEl('h3', {text: 'Rendering'});
+		containerEl.createEl('h3', {text: '渲染选项'});
 
 		new Setting(containerEl)
-			.setName('Include filename as header')
-			.setDesc("If checked, the filename is inserted as a level 1 header. (only if an entire document is copied)")
+			.setName('包含文件名作为标题')
+			.setDesc('如果选中，文件名将作为一级标题插入。（仅当整个文档被复制时才有效）')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.fileNameAsHeader)
 				.onChange(async (value) => {
@@ -978,8 +979,8 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				}))
 
 		new Setting(containerEl)
-			.setName('Copy HTML fragment only')
-			.setDesc("If checked, only generate a HTML fragment and not a full HTML document. This excludes the header, and effectively disables all styling.")
+			.setName('复制为仅 HTML 片段')
+			.setDesc('如果选中，仅生成 HTML 片段，而不是完整的 HTML 文档。这会排除标题，并且有效地禁用所有样式。')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.bareHtmlOnly)
 				.onChange(async (value) => {
@@ -998,10 +999,10 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Remove dataview metadata lines')
+			.setName('移除数据视图元数据行')
 			.setDesc(CopyDocumentAsHTMLSettingsTab.createFragmentWithHTML(`
-				<p>Remove lines that only contain dataview meta-data, eg. "rating:: 9". Metadata between square brackets is left intact.</p>
-				<p>Current limitations are that lines starting with a space are not removed, and lines that look like metadata in code blocks are removed if they don't start with a space</p>`))
+				<p>如果选中，将移除仅包含数据视图元数据的行，例如 "rating:: 9"。方括号中的元数据将保持不变。</p>
+				<p>当前限制是，以空格开头的行不会被移除，而代码块中的元数据行如果不以空格开头，也会被移除。</p>`))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.removeDataviewMetadataLines)
 				.onChange(async (value) => {
@@ -1010,18 +1011,18 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Footnote handling')
+			.setName('脚注处理')
 			.setDesc(CopyDocumentAsHTMLSettingsTab.createFragmentWithHTML(`
 				<ul>
-				  <li>Remove everything: Remove references and links.</li>
-				  <li>Display only: leave reference and foot-note, but don't display as a link.</li> 
-				  <li>Display and link: attempt to link the reference to the footnote, may not work depending on paste target.</li>
+				  <li>全部移除：移除引用和链接。</li>
+				  <li>仅显示：保留引用和脚注，但不显示为链接。</li>
+				  <li>显示并链接：尝试将引用链接到脚注，根据粘贴目标的不同可能不起作用。</li>
 				</ul>`)
 			)
 			.addDropdown(dropdown => dropdown
-				.addOption(FootnoteHandling.REMOVE_ALL.toString(), 'Remove everything')
-				.addOption(FootnoteHandling.REMOVE_LINK.toString(), 'Display only')
-				.addOption(FootnoteHandling.LEAVE_LINK.toString(), 'Display and link')
+				.addOption(FootnoteHandling.REMOVE_ALL.toString(), '全部移除')
+				.addOption(FootnoteHandling.REMOVE_LINK.toString(), '仅显示')
+				.addOption(FootnoteHandling.LEAVE_LINK.toString(), '显示并链接')
 				.setValue(this.plugin.settings.footnoteHandling.toString())
 				.onChange(async (value) => {
 					switch (value) {
@@ -1044,9 +1045,9 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 			)
 
 		new Setting(containerEl)
-			.setName('Link handling')
+			.setName('内部链接处理')
 			.setDesc(CopyDocumentAsHTMLSettingsTab.createFragmentWithHTML(`
-				This option controls how links to Obsidian documents and tags are handled.
+				<p>此选项控制对 Obsidian 文档和标签的链接的处理方式。</p>
 				<ul>
 				  <li>Don't link: only render the link title</li>
 				  <li>Open with Obsidian: convert the link to an obsidian:// URI</li> 
@@ -1080,11 +1081,11 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				})
 			)
 
-		containerEl.createEl('h3', {text: 'Custom templates (advanced)'});
+		containerEl.createEl('h3', {text: '自定义模板（高级）'});
 
 		const useCustomStylesheetSetting = new Setting(containerEl)
-			.setName('Provide a custom stylesheet')
-			.setDesc('The default stylesheet provides minimalistic theming. You may want to customize it for better looks. Disabling this setting will restore the default stylesheet.');
+			.setName('使用自定义样式表（待实现）')
+			.setDesc('默认样式表提供了基本的主题。您可能需要自定义它以获得更好的外观。禁用此设置将恢复默认样式表。');
 
 		const customStylesheetSetting = new Setting(containerEl)
 			.setClass('customizable-text-setting')
@@ -1111,7 +1112,7 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 		});
 
 		const useCustomHtmlTemplateSetting = new Setting(containerEl)
-			.setName('Provide a custom HTML template')
+			.setName('使用自定义 HTML 模板（待实现）')
 			.setDesc(CopyDocumentAsHTMLSettingsTab.createFragmentWithHTML(`For even more customization, you can 
 provide a custom HTML template. Disabling this setting will restore the default template.<br/><br/>
 Note that the template is not used if the "Copy HTML fragment only" setting is enabled.`));
@@ -1148,11 +1149,11 @@ Note that the template is not used if the "Copy HTML fragment only" setting is e
 				});
 		});
 
-		containerEl.createEl('h3', {text: 'Exotic / Developer options'});
+		containerEl.createEl('h3', {text: '其他 / 开发选项'});
 
 		new Setting(containerEl)
-			.setName("Don't embed images")
-			.setDesc("When this option is enabled, images will not be embedded in the HTML document, but <em>broken</em> links will be left in place. This is not recommended.")
+			.setName("禁用图片嵌入")
+			.setDesc("启用此选项后，图片将不会嵌入 HTML 文档中，而是保留为 <em>损坏的链接</em>。这不是推荐的做法。")
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.disableImageEmbedding)
 				.onChange(async (value) => {
