@@ -1,3 +1,46 @@
+# 参考结构
+
+README.md 中描述的主要部分包括：
+
+1. 封面与简介
+   - 项目名、Logo、一句话介绍与定位（更优雅的 Markdown 公众号排版工具）
+   - 官网/在线使用/文档/下载等快速链接
+   - 许可证与技术栈徽章（React、Electron、pnpm 等）
+
+2. 特性（✨ 特性）
+   - 功能表格列举的若干功能项（Markdown 语法、主题切换、一键复制、多图床、本地优先、跨平台、深色模式预览、高级搜索、滑动图组 等）
+
+3. 技术亮点（💡 技术亮点）
+   - 重点介绍微信深色模式预览算法（基于 wechatjs/mp-darkmode 的迁移与优化）
+   - 链接到算法原理解析与源码位置（packages/core/src/wechatDarkMode.ts）
+
+4. 快速开始（🚀 快速开始）
+   - 在线使用（edit.wemd.app）
+   - 桌面版下载说明与平台安装包格式（macOS、Windows、Linux）
+   - 平台注意事项（macOS、Windows、Linux 的启动/权限提示）
+
+5. 本地开发（🛠️ 本地开发）
+   - 环境要求（Node.js、pnpm）
+   - 安装与运行命令（pnpm install、pnpm dev:web、pnpm dev:desktop 等）
+   - 构建命令示例（构建 Web 与桌面应用的命令）
+
+6. 项目结构（📁 项目结构）
+   - 仓库目录树说明（apps、packages、templates、turbo.json 等）
+
+7. 截图（📸 截图）
+   - 提示有示例截图（.github/assets/screenshot.png）
+
+8. 反馈（💬 反馈）
+   - 提交 Issue 的链接
+
+9. 致谢（🤝 致谢）
+   - 对 wechatjs/mp-darkmode 的引用与感谢
+
+10. 许可证（📄 License）
+    - MIT 许可声明与版权（WeMD Team）
+
+如果需要，我可以把这些部分以更结构化的形式（例如目录列表或提纲）导出为 JSON、Markdown 目录或中文摘要。要哪个格式？
+
 # 复制文档为 HTML
 
 这是一个 [Obsidian](https://obsidian.md) 插件，可将当前文档复制到微信公众号，以便快速将文档内容分享到微信公众号。

@@ -1258,25 +1258,25 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 
 		// 注册智能复制命令：根据是否有选择内容决定复制整个文档还是选择部分
 		this.addCommand({
-			id: 'smart-copy-as-html',
-			name: 'Copy selection or document to clipboard',
+			id: 'smart-copy-to-mp',
+			name: '复制选择或文档到剪贴板',
 			checkCallback: this.buildCheckCallback(
 				view => this.copyFromView(view, view.editor.somethingSelected()))
 		})
 
-		// 注册复制整个文档命令
-		this.addCommand({
-			id: 'copy-as-html',
-			name: 'Copy entire document to clipboard',
-			checkCallback: this.buildCheckCallback(view => this.copyFromView(view, false))
-		});
+		// // 注册复制整个文档命令
+		// this.addCommand({
+		// 	id: 'copy-as-html',
+		// 	name: 'Copy entire document to clipboard',
+		// 	checkCallback: this.buildCheckCallback(view => this.copyFromView(view, false))
+		// });
 
-		// 注册复制选择内容命令
-		this.addCommand({
-			id: 'copy-selection-as-html',
-			name: 'Copy current selection to clipboard',
-			checkCallback: this.buildCheckCallback(view => this.copyFromView(view, true))
-		});
+		// // 注册复制选择内容命令
+		// this.addCommand({
+		// 	id: 'copy-selection-as-html',
+		// 	name: 'Copy current selection to clipboard',
+		// 	checkCallback: this.buildCheckCallback(view => this.copyFromView(view, true))
+		// });
 
 		// 注册后处理器来跟踪块渲染进度。详细解释见 DocumentRenderer#untilRendered()
 		// 这些后处理器用于检测 Markdown 渲染何时完成
@@ -1522,7 +1522,6 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 		return tempDiv.innerHTML;
 	}
 
-
 	private preprocessMarkdownList(content: string) {
 		// 规范化列表项格式
 		content = content.replace(/^(\s*(?:\d+\.|-|\*)\s+[^:\n]+)\n\s*:\s*(.+?)$/gm, '$1: $2');
@@ -1530,9 +1529,31 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 		content = content.replace(/^(\s*(?:\d+\.|-|\*)\s+[^:\n]+)\n:\s*(.+?)$/gm, '$1: $2');
 		content = content.replace(/^(\s*(?:\d+\.|-|\*)\s+.+?)\n\n\s+(.+?)$/gm, '$1 $2');
 
+		// // 处理包含<strong>标签的<li>元素，将其他文本包裹在<span>标签中
+		// content = content.replace(/<li([^>]*)>(.*?<strong[^>]*>.*?<\/strong>.*?)<\/li>/g, (match, attrs, innerContent) => {
+		// 	// 检查是否已经包含<span>标签
+		// 	if (!innerContent.includes('<span')) {
+		// 		// 提取<strong>标签及其内容
+		// 		const strongRegex = /(<strong[^>]*>.*?<\/strong>)/g;
+		// 		const parts = innerContent.split(strongRegex);
+				
+		// 		// 包裹非<strong>部分的文本
+		// 		const wrappedContent = parts.map((part: string) => {
+		// 			if (part.match(strongRegex)) {
+		// 				return part; // 已经是<strong>标签的部分保持不变
+		// 			} else if (part.trim() !== '') {
+		// 				return `<span>${part}</span>`; // 其他文本部分包裹在<span>标签中
+		// 			}
+		// 			return part; // 空白部分保持不变
+		// 		}).join('');
+				
+		// 		return `<li${attrs}>${wrappedContent}</li>`;
+		// 	}
+		// 	return match; // 如果已经包含<span>标签，则保持原样
+		// });
+
 		return content;
 	}
-
 
 	// 应用内联样式 ++++++
 	private applyInlineStyles(html: string) {
@@ -1598,7 +1619,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 			this.app.workspace.on("file-menu", (menu, file, view) => {
 				menu.addItem((item) => {
 					item
-						.setTitle("Copy as HTML")  // 菜单项标题
+						.setTitle("复制到公众号")  // 菜单项标题
 						.setIcon("clipboard-copy")  // 菜单项图标
 						.onClick(async () => {
 							return this.copyFromFile(file);  // 点击时调用复制方法
