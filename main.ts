@@ -24,17 +24,35 @@ import { STYLES } from './styles_temp.js';
 /**
  * 类似 Promise.all()，但带有进度回调。感谢来自
  * https://stackoverflow.com/a/42342373/1341132
- */
+//  */
+// function allWithProgress(promises: Promise<never>[], callback: (percentCompleted: number) => void) {
+// 	let count = 0;
+// 	callback(0);
+// 	for (const promise of promises) {
+// 		promise.then(() => {
+// 			count++;
+// 			callback((count * 100) / promises.length);
+// 		});
+// 	}
+// 	return Promise.all(promises);
+// }
+
 function allWithProgress(promises: Promise<never>[], callback: (percentCompleted: number) => void) {
-	let count = 0;
-	callback(0);
-	for (const promise of promises) {
-		promise.then(() => {
-			count++;
-			callback((count * 100) / promises.length);
-		});
-	}
-	return Promise.all(promises);
+    let count = 0;
+    callback(0);
+    for (const promise of promises) {
+        // Add both .then and .catch handlers to handle rejections
+        promise.then(() => {
+            count++;
+            callback((count * 100) / promises.length);
+        }).catch(() => {
+            // Handle rejection by still counting it as completed
+            count++;
+            callback((count * 100) / promises.length);
+            // Re-throw or handle as needed based on your requirements
+        });
+    }
+    return Promise.all(promises);
 }
 
 /**
@@ -310,7 +328,6 @@ type DocumentRendererOptions = {
 	convertSvgToBitmap: boolean,
 	removeFrontMatter: boolean,
 	formatCodeWithTables: boolean,
-	formatCalloutsWithTables: boolean,
 	embedExternalLinks: boolean,
 	removeDataviewMetadataLines: boolean,
 	footnoteHandling: FootnoteHandling
@@ -322,7 +339,6 @@ const documentRendererDefaults: DocumentRendererOptions = {
 	convertSvgToBitmap: true,
 	removeFrontMatter: true,
 	formatCodeWithTables: false,
-	formatCalloutsWithTables: false,
 	embedExternalLinks: false,
 	removeDataviewMetadataLines: false,
 	footnoteHandling: FootnoteHandling.REMOVE_LINK,
@@ -374,11 +390,9 @@ class DocumentRenderer {
 		this.modal = new CopyingToHtmlModal(this.app);
 		this.modal.open();
 
-		console.log('origin markdown:');
-		// console.log(markdown);
 		try {
 			const topNode = await this.renderMarkdown(markdown, path);
-			return await this.transformHTML(topNode!);
+			return await this.transformHTML(topNode);
 		} finally {
 			this.modal.close();
 		}
@@ -399,7 +413,8 @@ class DocumentRenderer {
 		const processedMarkdown = this.preprocessMarkdown(markdown);
 
 		const wrapper = document.createElement('div');
-		wrapper.style.display = 'hidden';
+		// wrapper.style.display = 'hidden';
+		wrapper.addClass('hidden');
 		document.body.appendChild(wrapper);
 		// 使用 Obsidian 的 MarkdownRenderer 渲染 Markdown 内容到 wrapper 元素中
 		await MarkdownRenderer.render(this.app, processedMarkdown, wrapper, path, this.view);
@@ -451,7 +466,7 @@ class DocumentRenderer {
 			try {
 				// 依赖于 Sheet 插件（advanced-table-xt）没有被压缩
 				if (component?.constructor?.name === 'SheetElement') {
-					await component.onload();
+					component.onload();
 				}
 			} catch (error) {
 				console.error(`Error calling onload()`, error);
@@ -513,14 +528,6 @@ class DocumentRenderer {
 		this.removeCollapseIndicators(node);
 		this.removeButtons(node);
 		this.removeStrangeNewWorldsLinks(node);
-
-		if (this.options.formatCodeWithTables) {
-			this.transformCodeToTables(node);
-		}
-
-		if (this.options.formatCalloutsWithTables) {
-			this.transformCalloutsToTables(node);
-		}
 
 		if (this.options.footnoteHandling == FootnoteHandling.REMOVE_ALL) {
 			this.removeAllFootnotes(node);
@@ -619,54 +626,6 @@ class DocumentRenderer {
 			.forEach(node => node.remove());
 	}
 
-	/** Transform code blocks to tables */
-	private transformCodeToTables(node: HTMLElement) {
-		node.querySelectorAll('pre')
-			.forEach(node => {
-				const codeEl = node.querySelector('code');
-				if (codeEl) {
-					const code = codeEl.innerHTML.replace(/\n*$/, '');
-					const table = node.parentElement!.createEl('table');
-					table.className = 'source-table';
-					table.innerHTML = `<tr><td><pre>${code}</pre></td></tr>`;
-					node.parentElement!.replaceChild(table, node);
-				}
-			});
-	}
-
-	/** Transform callouts to tables */
-	private transformCalloutsToTables(node: HTMLElement) {
-		node.querySelectorAll('.callout')
-			.forEach(node => {
-				const callout = node.parentElement!.createEl('table');
-				callout.addClass('callout-table', 'callout');
-				callout.setAttribute('data-callout', node.getAttribute('data-callout') ?? 'quote');
-				const headRow = callout.createEl('tr');
-				const headColumn = headRow.createEl('td');
-				headColumn.addClass('callout-title');
-				// const img = node.querySelector('svg');
-				const title = node.querySelector('.callout-title-inner');
-
-				// if (img) {
-				// 	headColumn.appendChild(img);
-				// }
-
-				if (title) {
-					const span = headColumn.createEl('span');
-					span.innerHTML = title.innerHTML;
-				}
-
-				const originalContent = node.querySelector('.callout-content');
-				if (originalContent) {
-					const row = callout.createEl('tr');
-					const column = row.createEl('td');
-					column.innerHTML = originalContent.innerHTML;
-				}
-
-				node.replaceWith(callout);
-			});
-	}
-
 	/** Remove references to footnotes and the footnotes section */
 	private removeAllFootnotes(node: HTMLElement) {
 		node.querySelectorAll('section.footnotes')
@@ -746,8 +705,11 @@ class DocumentRenderer {
 
 		const replaceSvg = async (svg: SVGSVGElement) => {
 			const style: HTMLStyleElement = svg.querySelector('style') || svg.appendChild(document.createElement('style'));
-			style.innerHTML += MERMAID_STYLESHEET;
-
+			
+			// 替代 style.innerHTML += MERMAID_STYLESHEET;
+			const textNode = document.createTextNode(MERMAID_STYLESHEET);
+			style.appendChild(textNode);
+			
 			const svgAsString = xmlSerializer.serializeToString(svg);
 
 			const svgData = `data:image/svg+xml;base64,` + Buffer.from(svgAsString).toString('base64');
@@ -823,7 +785,7 @@ class DocumentRenderer {
 					resolve(uri);
 				} catch (err) {
 					// leave error at `log` level (not `error`), since we leave an url that may be workable
-					console.log(`failed ${url}`, err);
+					console.error(`failed ${url}`, err);
 					// if we fail, leave the original url.
 					// This way images that we may not load from external sources (tainted) may still be accessed
 					// (eg. plantuml)
@@ -835,7 +797,7 @@ class DocumentRenderer {
 			}
 
 			image.onerror = (err) => {
-				console.log('could not load data uri');
+				console.error('could not load data uri');
 				// if we fail, leave the original url
 				resolve(url);
 			}
@@ -911,8 +873,24 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 	}
 
 	// 感谢 Obsidian Tasks 插件！
-	private static createFragmentWithHTML = (html: string) =>
-		createFragment((documentFragment) => (documentFragment.createDiv().innerHTML = html));
+	private static createFragmentWithHTML = (html: string) => {
+		return createFragment((documentFragment) => {
+			const div = documentFragment.createDiv();
+			
+			// 清空 div 的内容
+			div.empty();
+			
+			// 使用更安全的方式添加 HTML 内容
+			// 创建一个临时的 div 来解析 HTML
+			const tempDiv = document.createElement('div');
+			tempDiv.innerHTML = html;
+			
+			// 将解析后的内容移动到目标 div
+			while (tempDiv.firstChild) {
+				div.appendChild(tempDiv.firstChild);
+			}
+		});
+	};
 
 	display(): void {
 		const {containerEl} = this;
@@ -1299,14 +1277,12 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 		return (checking: boolean): boolean => {
 			// 检查是否已经有复制操作在进行中
 			if (copyIsRunning) {
-				console.log('Document is already being copied');
 				return false;
 			}
 
 			// 获取当前活动的 Markdown 视图
 			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (!activeView) {
-				console.log('Nothing to copy: No active markdown view');
 				return false;
 			}
 
@@ -1353,13 +1329,13 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 	private async copyFromFile(file: TAbstractFile) {
 		// 检查是否是文件（不是文件夹）
 		if (!(file instanceof TFile)) {
-			console.log(`cannot copy folder to HTML: ${file.path}`);
+			console.error(`cannot copy folder to HTML: ${file.path}`);
 			return;
 		}
 
 		// 检查文件扩展名是否为 .md
 		if (file.extension.toLowerCase() !== 'md') {
-			console.log(`cannot only copy .md files to HTML: ${file.path}`);
+			console.error(`cannot only copy .md files to HTML: ${file.path}`);
 			return;
 		}
 
@@ -1376,7 +1352,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 	 * @param isFullDocument 是否是完整文档（true=完整文档，false=部分内容）
 	 */
 	private async doCopy(markdown: string, path: string, name: string, isFullDocument: boolean) {
-		console.log(`Copying "${path}" to clipboard...`);
+		console.debug(`Copying "${path}" to clipboard...`);
 		const title = name.replace(/\.md$/i, ''); // 移除 .md 扩展名作为标题
 
 		// 创建文档渲染器，传入当前应用实例和设置
@@ -1428,7 +1404,6 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 
 			// 写入剪贴板
 			await navigator.clipboard.write([data]);
-			console.log(`Copied to clipboard as HTML`);
 			new Notice(`复制成功！`);
 		} catch (error) {
 			new Notice(`copy failed: ${error}`);
@@ -1440,9 +1415,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 
 	/** 代码块简化 */
 	private simplifyCodeBlocks(htmlString: string): string {
-		// console.log('Simplifying code blocks start');
-		// console.log(htmlString);
-		
+
 		// 创建临时DOM元素来处理HTML字符串
 		const tempDiv = document.createElement('div');
 		tempDiv.innerHTML = htmlString;
@@ -1484,7 +1457,6 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 			}
 		});
 		
-		console.log('Simplifying code blocks end');
 		// 返回处理后的HTML字符串
 		return tempDiv.innerHTML;
 	}

@@ -23,3 +23,7 @@
 	width: 100%;
 	height: 15em;
 }
+
+.hidden {
+	display: none !important;
+  }

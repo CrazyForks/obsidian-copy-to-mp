@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 const files = ["main.js", "manifest.json", "styles.css"];
-const targetDir = "test";
+const targetDir = "test/copy-to-mp";
 
 // 1. 删除并重建目录（保证强行覆盖）
 fs.rmSync(targetDir, { recursive: true, force: true });
@@ -13,4 +13,4 @@ for (const file of files) {
   fs.copyFileSync(file, path.join(targetDir, file));
 }
 
-console.log("Release files copied to /test");
+console.debug("Release files copied to /test/copy-to-mp");
