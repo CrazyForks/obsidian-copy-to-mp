@@ -12,7 +12,7 @@ import {
 	Setting,              // 设置项类，用于在设置面板中添加单个控件（开关、输入框等）
 	TAbstractFile,        // 抽象文件类，代表文件系统中的任意文件或文件夹
 	TFile                 // 文件类，继承自 TAbstractFile，表示具体文件（如 Markdown 文件）
-  } from 'obsidian';
+} from 'obsidian';
 
 // 导入样式配置
 import { STYLES } from './styles_temp.js';
@@ -38,21 +38,21 @@ import { STYLES } from './styles_temp.js';
 // }
 
 function allWithProgress(promises: Promise<never>[], callback: (percentCompleted: number) => void) {
-    let count = 0;
-    callback(0);
-    for (const promise of promises) {
-        // Add both .then and .catch handlers to handle rejections
-        promise.then(() => {
-            count++;
-            callback((count * 100) / promises.length);
-        }).catch(() => {
-            // Handle rejection by still counting it as completed
-            count++;
-            callback((count * 100) / promises.length);
-            // Re-throw or handle as needed based on your requirements
-        });
-    }
-    return Promise.all(promises);
+	let count = 0;
+	callback(0);
+	for (const promise of promises) {
+		// Add both .then and .catch handlers to handle rejections
+		promise.then(() => {
+			count++;
+			callback((count * 100) / promises.length);
+		}).catch(() => {
+			// Handle rejection by still counting it as completed
+			count++;
+			callback((count * 100) / promises.length);
+			// Re-throw or handle as needed based on your requirements
+		});
+	}
+	return Promise.all(promises);
 }
 
 /**
@@ -295,6 +295,31 @@ enum FootnoteHandling {
 	TITLE_ATTRIBUTE
 }
 
+
+/**
+ * 样式风格枚举
+ */
+enum StyleSheetStyle {
+	WECHAT_DEFAULT = "wechat-default",
+	LATEPOST_DEPTH_DEFAULT = "latepost-depth",
+	WECHAT_FT_DEFAULT = "wechat-ft",
+	WECHAT_ANTHROPIC_DEFAULT = "wechat-anthropic",
+	WECHAT_TECH_DEFAULT = "wechat-tech",
+	WECHAT_ELEGANT_DEFAULT = "wechat-elegant",
+	WECHAT_DEEPREAD_DEFAULT = "wechat-deepread",
+	WECHAT_NYT_DEFAULT = "wechat-nyt",
+	WECHAT_JONYIVE_DEFAULT = "wechat-jonyive",
+	WECHAT_MEDIUM_DEFAULT = "wechat-medium",
+	WECHAT_APPLE_DEFAULT = "wechat-apple",
+	KENYA_EMPTINESS_DEFAULT = "kenya-emptiness",
+	HISCHE_EDITORIAL_DEFAULT = "hische-editorial",
+	ANDO_CONCRETE_DEFAULT = "ando-concrete",
+	GAUDI_ORGANIC_DEFAULT = "gaudi-organic",
+	GUARDIAN_DEFAULT = "guardian",
+	NIKKEEI_DEFAULT = "nikkei",
+	LEMONDE_DEFAULT = "lemonde",
+}
+
 /**
  * 内部链接处理方式枚举
  */
@@ -371,7 +396,7 @@ class DocumentRenderer {
 	private readonly vaultSearchUri: string;
 
 	constructor(private app: App,
-				private options: DocumentRendererOptions = documentRendererDefaults) {
+		private options: DocumentRendererOptions = documentRendererDefaults) {
 		this.vaultPath = (this.app.vault.getRoot().vault.adapter as FileSystemAdapter).getBasePath()
 			.replace(/\\/g, '/');
 
@@ -647,7 +672,7 @@ class DocumentRenderer {
 					link.parentNode!.removeChild(link);
 				} else {
 					// 从引用中移除
-					const span = link.parentNode!.createEl('span', {text: link.getText(), cls: 'footnote-link'})
+					const span = link.parentNode!.createEl('span', { text: link.getText(), cls: 'footnote-link' })
 					link.parentNode!.replaceChild(span, link);
 				}
 			});
@@ -705,11 +730,11 @@ class DocumentRenderer {
 
 		const replaceSvg = async (svg: SVGSVGElement) => {
 			const style: HTMLStyleElement = svg.querySelector('style') || svg.appendChild(document.createElement('style'));
-			
+
 			// 替代 style.innerHTML += MERMAID_STYLESHEET;
 			const textNode = document.createTextNode(MERMAID_STYLESHEET);
 			style.appendChild(textNode);
-			
+
 			const svgAsString = xmlSerializer.serializeToString(svg);
 
 			const svgData = `data:image/svg+xml;base64,` + Buffer.from(svgAsString).toString('base64');
@@ -851,14 +876,14 @@ class CopyingToHtmlModal extends Modal {
 	}
 
 	onOpen() {
-		const {titleEl, contentEl} = this;
+		const { titleEl, contentEl } = this;
 		titleEl.setText('Copying to clipboard');
 		this._progress = contentEl.createEl('progress');
 		this._progress.style.width = '100%';
 	}
 
 	onClose() {
-		const {contentEl} = this;
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }
@@ -876,15 +901,15 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 	private static createFragmentWithHTML = (html: string) => {
 		return createFragment((documentFragment) => {
 			const div = documentFragment.createDiv();
-			
+
 			// 清空 div 的内容
 			div.empty();
-			
+
 			// 使用更安全的方式添加 HTML 内容
 			// 创建一个临时的 div 来解析 HTML
 			const tempDiv = document.createElement('div');
 			tempDiv.innerHTML = html;
-			
+
 			// 将解析后的内容移动到目标 div
 			while (tempDiv.firstChild) {
 				div.appendChild(tempDiv.firstChild);
@@ -893,13 +918,13 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 	};
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: '设置'});
+		containerEl.createEl('h2', { text: '设置' });
 
-		containerEl.createEl('h3', {text: '兼容性选项'});
+		containerEl.createEl('h3', { text: '兼容性选项' });
 
 		new Setting(containerEl)
 			.setName('将 SVG 转换为位图')
@@ -921,7 +946,7 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		containerEl.createEl('h3', {text: '渲染选项'});
+		containerEl.createEl('h3', { text: '渲染选项' });
 
 		new Setting(containerEl)
 			.setName('包含文件名作为标题')
@@ -988,6 +1013,46 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
+		// 样式选项映射
+		const styleOptions: Record<string, StyleSheetStyle> = {
+			'默认公众号风格': StyleSheetStyle.WECHAT_DEFAULT,
+			'晚点风格': StyleSheetStyle.LATEPOST_DEPTH_DEFAULT,
+			'金融时报': StyleSheetStyle.WECHAT_FT_DEFAULT,
+			'Claude': StyleSheetStyle.WECHAT_ANTHROPIC_DEFAULT,
+			'技术风格': StyleSheetStyle.WECHAT_TECH_DEFAULT,
+			'优雅简约': StyleSheetStyle.WECHAT_ELEGANT_DEFAULT,
+			'深度阅读': StyleSheetStyle.WECHAT_DEEPREAD_DEFAULT,
+			'纽约时报': StyleSheetStyle.WECHAT_NYT_DEFAULT,
+			'Jony Ive': StyleSheetStyle.WECHAT_JONYIVE_DEFAULT,
+			'Medium 长文': StyleSheetStyle.WECHAT_MEDIUM_DEFAULT,
+			'Apple 极简': StyleSheetStyle.WECHAT_APPLE_DEFAULT,
+			'原研哉·空': StyleSheetStyle.KENYA_EMPTINESS_DEFAULT,
+			'Hische·编辑部': StyleSheetStyle.HISCHE_EDITORIAL_DEFAULT,
+			'安藤·清水': StyleSheetStyle.ANDO_CONCRETE_DEFAULT,
+			'高迪·有机': StyleSheetStyle.GAUDI_ORGANIC_DEFAULT,
+			'Guardian 卫报': StyleSheetStyle.GUARDIAN_DEFAULT,
+			'Nikkei 日経': StyleSheetStyle.NIKKEEI_DEFAULT,
+			'Le Monde 世界报': StyleSheetStyle.LEMONDE_DEFAULT,
+		};
+
+		// 添加 Setting
+		new Setting(containerEl)
+		.setName('样式风格')
+		.setDesc('选择要使用的样式表风格。')
+		.addDropdown(dropdown => {
+			// 循环添加选项
+			Object.entries(styleOptions).forEach(([label, value]) => {
+				dropdown.addOption(value, label);
+			});
+	
+			// 设置默认值
+			dropdown
+				.setValue(this.plugin.settings.styleSheetStyle)
+				.onChange(async (value) => {
+					this.plugin.settings.styleSheetStyle = value as StyleSheetStyle;
+					await this.plugin.saveSettings();
+				});
+		});
 
 		new Setting(containerEl)
 			.setName('内部链接处理')
@@ -1026,7 +1091,7 @@ class CopyDocumentAsHTMLSettingsTab extends PluginSettingTab {
 				})
 			)
 
-		containerEl.createEl('h3', {text: '自定义模板（高级）'});
+		containerEl.createEl('h3', { text: '自定义模板（高级）' });
 
 		const useCustomStylesheetSetting = new Setting(containerEl)
 			.setName('使用自定义样式表（待实现）')
@@ -1094,7 +1159,7 @@ Note that the template is not used if the "Copy HTML fragment only" setting is e
 				});
 		});
 
-		containerEl.createEl('h3', {text: '其他 / 开发选项'});
+		containerEl.createEl('h3', { text: '其他 / 开发选项' });
 
 		new Setting(containerEl)
 			.setName("禁用图片嵌入")
@@ -1159,6 +1224,9 @@ type CopyDocumentAsHTMLSettings = {
 	/** 是否在复制时包含文件名作为标题（仅当复制整个文档时生效） */
 	fileNameAsHeader: boolean;
 
+	/** 样式风格，默认值为 wechat-default */
+	styleSheetStyle: StyleSheetStyle;
+
 	/**
 	 * 是否禁用图片嵌入（不推荐，会留下损坏的链接）
 	 */
@@ -1182,6 +1250,7 @@ const DEFAULT_SETTINGS: CopyDocumentAsHTMLSettings = {
 	bareHtmlOnly: false,
 	fileNameAsHeader: false,
 	disableImageEmbedding: false,
+	styleSheetStyle: StyleSheetStyle.WECHAT_DEFAULT,
 }
 
 /**
@@ -1350,6 +1419,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 	 * @param path 文件路径
 	 * @param name 文件名
 	 * @param isFullDocument 是否是完整文档（true=完整文档，false=部分内容）
+	 * @param style 样式表lemondeth
 	 */
 	private async doCopy(markdown: string, path: string, name: string, isFullDocument: boolean) {
 		console.debug(`Copying "${path}" to clipboard...`);
@@ -1388,7 +1458,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 			htmlDocument = this.preprocessMarkdownList(htmlDocument);
 
 			// 应用内联样式
-			htmlDocument = this.applyInlineStyles(htmlDocument);
+			htmlDocument = this.applyInlineStyles(htmlDocument, this.settings.styleSheetStyle);
 
 			// 创建剪贴板项，同时包含 HTML 和纯文本格式
 			const data =
@@ -1419,7 +1489,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 		// 创建临时DOM元素来处理HTML字符串
 		const tempDiv = document.createElement('div');
 		tempDiv.innerHTML = htmlString;
-		
+
 		// 查询所有具有特定样式的 pre 标签，且包含 code 元素
 		const codeBlocks = tempDiv.querySelectorAll('pre:has(> code)');
 		// 遍历每个找到的代码块元素
@@ -1456,7 +1526,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 				block.parentNode!.replaceChild(pre, block);
 			}
 		});
-		
+
 		// 返回处理后的HTML字符串
 		return tempDiv.innerHTML;
 	}
@@ -1475,7 +1545,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 		// 		// 提取<strong>标签及其内容
 		// 		const strongRegex = /(<strong[^>]*>.*?<\/strong>)/g;
 		// 		const parts = innerContent.split(strongRegex);
-				
+
 		// 		// 包裹非<strong>部分的文本
 		// 		const wrappedContent = parts.map((part: string) => {
 		// 			if (part.match(strongRegex)) {
@@ -1485,7 +1555,7 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 		// 			}
 		// 			return part; // 空白部分保持不变
 		// 		}).join('');
-				
+
 		// 		return `<li${attrs}>${wrappedContent}</li>`;
 		// 	}
 		// 	return match; // 如果已经包含<span>标签，则保持原样
@@ -1495,37 +1565,42 @@ export default class CopyDocumentAsHTMLPlugin extends Plugin {
 	}
 
 	// 应用内联样式 ++++++
-	private applyInlineStyles(html: string) {
-		const style = STYLES['wechat-default'].styles;
+	private applyInlineStyles(html: string, applyStyle: StyleSheetStyle) {
+		const styleKey = applyStyle as keyof typeof STYLES;
+		const styleObj = STYLES[styleKey];
+		if (!styleObj) {
+			console.warn(`样式 ${styleKey} 不存在，使用默认样式`);
+		}
+		const style = styleObj.styles;
 		const parser = new DOMParser();
 		const doc = parser.parseFromString(html, 'text/html');
-	
+
 		// // 先处理图片网格布局（在应用样式之前）
 		// this.groupConsecutiveImages(doc);
-	
+
 		Object.keys(style).forEach(selector => {
 			if (selector === 'pre' || selector === 'code' || selector === 'pre code') {
-			return;
+				return;
 			}
-	
+
 			// 跳过已经在网格容器中的图片
 			const elements = doc.querySelectorAll(selector);
 			elements.forEach(el => {
-			// 如果是图片且在网格容器内，跳过样式应用
-			if (el.tagName === 'IMG' && el.closest('.image-grid')) {
-				return;
-			}
-	
-			const currentStyle = el.getAttribute('style') || '';
-			// 添加类型断言，确保 TypeScript 知道 selector 是 style 对象的有效键
-			el.setAttribute('style', currentStyle + '; ' + style[selector as keyof typeof style]);
+				// 如果是图片且在网格容器内，跳过样式应用
+				if (el.tagName === 'IMG' && el.closest('.image-grid')) {
+					return;
+				}
+
+				const currentStyle = el.getAttribute('style') || '';
+				// 添加类型断言，确保 TypeScript 知道 selector 是 style 对象的有效键
+				el.setAttribute('style', currentStyle + '; ' + style[selector as keyof typeof style]);
 			});
 		});
-	
+
 		const container = doc.createElement('div');
 		container.setAttribute('style', style.container);
 		container.innerHTML = doc.body.innerHTML;
-	
+
 		return container.outerHTML;
 	}
 
